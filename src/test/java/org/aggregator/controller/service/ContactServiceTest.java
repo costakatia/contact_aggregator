@@ -1,7 +1,7 @@
 package org.aggregator.controller.service;
 
-
-import org.dto.ExternalContactResponse;
+import org.dto.ContactDTO;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,99 +9,74 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.model.Contact;
 import org.service.ContactService;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ContactServiceTest {
-
-    @InjectMocks
-    private ContactService contactService;
+public class ContactServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
 
+    @InjectMocks
+    private ContactService contactService;
 
+    private Contact[] contactsPage1;
+    private Contact[] contactsPage2;
 
-    private static final String API_URL = "https://k-messages-api.herokuapp.com/api/v1/contacts";
-    private static final String AUTH_TOKEN = "J7ybt6jv6pdJ4gyQP9gNonsY";
+    @BeforeEach
+    public void setUp() {
+        // Initialize mock data
+        contactsPage1 = new Contact[]{
+                new Contact(1, "John Doe", "john.doe@example.com", "2023-01-01T00:00:00Z", LocalDateTime.now(),LocalDateTime.now()),
+                new Contact(2, "Jane Smith", "jane.smith@example.com", "2023-01-01T00:00:00Z", LocalDateTime.now(),LocalDateTime.now())
+        };
 
+        contactsPage2 = new Contact[]{
+                new Contact(3, "Alice Johnson", "alice.johnson@example.com", "2023-01-01T00:00:00Z", LocalDateTime.now(),LocalDateTime.now())
+        };
+    }
 
     @Test
     public void testGetAllContacts() {
-        // Mock the response from the external API
-        ExternalContactResponse mockResponse = new ExternalContactResponse();
-        List<Contact> mockContacts = List.of (new Contact(2, "name", "teste@teste.com", "source", LocalDateTime.now(), LocalDateTime.now()));
-        new Contact(2, "Name", "teste@teste.com", "source", LocalDateTime.now(), LocalDateTime.now());
-        mockResponse.setContacts(mockContacts);
+        // Mock the RestTemplate behavior
+        when(restTemplate.getForObject(anyString(), eq(Contact[].class)))
+                .thenReturn(contactsPage1)
+                .thenReturn(contactsPage2)
+                .thenReturn(new Contact[0]); // Simulate no more pages
 
-        ResponseEntity<ExternalContactResponse> responseEntity = ResponseEntity.ok(mockResponse);
+        // Call the method under test
+        List<ContactDTO> result = contactService.getAllContacts();
 
-        // Mock the RestTemplate exchange method
-        when(restTemplate.exchange(
-                eq(API_URL),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(ExternalContactResponse.class)
-        )).thenReturn(responseEntity);
+        // Verify the results
+        assertEquals(3, result.size());
+        assertEquals("John Doe", result.get(0).getName());
+        assertEquals("Jane Smith", result.get(1).getName());
+        assertEquals("Alice Johnson", result.get(2).getName());
 
-        // Call the method to test
-        List<Contact> contacts = contactService.getAllContacts();
-
-        // Verify the result
-        assertEquals(1, contacts.size());
-        assertEquals("name", contacts.get(0).getName());
-        assertEquals("teste@teste.com", contacts.get(0).getEmail());
+        // Verify that the RestTemplate was called the expected number of times
+        verify(restTemplate, times(3)).getForObject(anyString(), eq(Contact[].class));
     }
 
     @Test
-    public void testGetAllContactsEmptyResponse() {
-        // Mock the response from the external API
-        ExternalContactResponse mockResponse = new ExternalContactResponse();
-        mockResponse.setContacts(List.of());
+    public void testGetAllContactsEmpty() {
+        // Mock the RestTemplate behavior to return no contacts
+        when(restTemplate.getForObject(anyString(), eq(Contact[].class)))
+                .thenReturn(new Contact[0]);
 
-        ResponseEntity<ExternalContactResponse> responseEntity = ResponseEntity.ok(mockResponse);
+        // Call the method under test
+        List<ContactDTO> result = contactService.getAllContacts();
 
-        // Mock the RestTemplate exchange method
-        when(restTemplate.exchange(
-                eq(API_URL),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(ExternalContactResponse.class)
-        )).thenReturn(responseEntity);
+        // Verify the results
+        assertEquals(0, result.size());
 
-        // Call the method to test
-        List<Contact> contacts = contactService.getAllContacts();
-
-        // Verify the result
-        assertEquals(0, contacts.size());
-    }
-
-    @Test
-    public void testGetAllContactsNullResponse() {
-        // Mock the response from the external API
-        ResponseEntity<ExternalContactResponse> responseEntity = ResponseEntity.ok(null);
-
-        // Mock the RestTemplate exchange method
-        when(restTemplate.exchange(
-                eq(API_URL),
-                eq(HttpMethod.GET),
-                any(HttpEntity.class),
-                eq(ExternalContactResponse.class)
-        )).thenReturn(responseEntity);
-
-        // Call the method to test
-        List<Contact> contacts = contactService.getAllContacts();
-
-        // Verify the result
-        assertEquals(0, contacts.size());
+        // Verify that the RestTemplate was called once
+        verify(restTemplate, times(1)).getForObject(anyString(), eq(Contact[].class));
     }
 }

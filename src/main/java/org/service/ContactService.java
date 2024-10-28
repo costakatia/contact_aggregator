@@ -1,65 +1,56 @@
 package org.service;
 
 
-import org.dto.ExternalContactResponse;
-import org.model.Contact;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.dto.ContactDTO;
 
+import org.model.Contact;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
-
-@Component
+@Service
 public class ContactService {
 
-   /* RestTemplate restTemplate = new RestTemplate();
-    private static final String API_URL = "https://k-messages-api.herokuapp.com/api/v1/contacts";
-    private static final String AUTH_TOKEN = "J7ybt6jv6pdJ4gyQP9gNonsY";
+    private final RestTemplate restTemplate;
 
-    public List<Contact> getAllContacts() {
-
-
-        // Criar headers com o token de autenticação
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(AUTH_TOKEN);
-
-        // Construir a requisição HTTP
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        // Fazer a chamada GET com headers
-        ResponseEntity<ExternalContactResponse> response = restTemplate.exchange(
-                API_URL, HttpMethod.GET, entity, ExternalContactResponse.class);
-
-        // Retornar os contatos da resposta
-        return response.getBody() != null ? response.getBody().getContacts() : List.of();
+    public ContactService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
-}*/
 
-    public List<Contact> getAllContacts() {
+    public List<ContactDTO> getAllContacts() {
+        List<ContactDTO> contactDTOs = new ArrayList<>();
+        int page = 1;
+        boolean hasMorePages = true;
 
-        RestTemplate restTemplate = new RestTemplate();
-        final String API_URL = "https://k-messages-api.herokuapp.com/api/v1/contacts";
-        final String AUTH_TOKEN = "J7ybt6jv6pdJ4gyQP9gNonsY";
+        while (hasMorePages) {
+            // Call the external API
+            String url = String.format("https://k-messages-api.herokuapp.com/api/v1/contacts?page=%d", page);
+            Contact[] contacts = restTemplate.getForObject(url, Contact[].class);
 
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setBearerAuth(AUTH_TOKEN);
-            HttpEntity<String> entity = new HttpEntity<>(headers);
+            // Convert to DTOs and collect
+            assert contacts != null;
+            for (Contact contact : contacts) {
+                ContactDTO dto = new ContactDTO(
+                        contact.getId(),
+                        contact.getName(),
+                        contact.getEmail(),
+                        "KENECT_LABS",
+                        contact.getCreatedAt(),
+                        contact.getUpdatedAt()
+                );
 
-            ResponseEntity<ExternalContactResponse> response = restTemplate.exchange(
-                    API_URL, HttpMethod.GET, entity, ExternalContactResponse.class
-            );
+                contactDTOs.add(dto);
+            }
 
-            return response.getBody() != null ? response.getBody().getContacts() : List.of();
-        } catch (Exception e) {
-            e.printStackTrace(); // Log do erro para inspeção
-            return List.of(); // Retorna uma lista vazia em caso de erro
+            // Check if there are more pages
+            // (You would normally get this from the headers of the response)
+            // Simulating with a static condition for this example
+            hasMorePages = (contacts.length > 0);
+            page++;
         }
+
+        return contactDTOs;
     }
 }

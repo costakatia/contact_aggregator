@@ -1,10 +1,8 @@
 package org.controller;
 
 
-import org.model.Contact;
+import org.dto.ContactDTO;
 import org.service.ContactService;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,9 +17,9 @@ public class ContactController {
         this.contactService = contactService;
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Contact>> getAllContacts() {
-        List<Contact> contacts = contactService.getAllContacts();
-        return ResponseEntity.ok(contacts);
+    @GetMapping
+    public List<ContactDTO> getAllContacts() {
+        return  contactService.getAllContacts();
+
     }
 }
