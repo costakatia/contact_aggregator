@@ -1,0 +1,76 @@
+Index: src/main/java/org/dto/ContactDTO.java
+===================================================================
+diff --git a/src/main/java/org/dto/ContactDTO.java b/src/main/java/org/dto/ContactDTO.java
+deleted file mode 100644
+--- a/src/main/java/org/dto/ContactDTO.java	(revision 146c78c97f18c3ff4ba84851b79c19abc894c3dd)
++++ /dev/null	(revision 146c78c97f18c3ff4ba84851b79c19abc894c3dd)
+@@ -1,20 +0,0 @@
+-package org.dto;
+-
+-import lombok.AllArgsConstructor;
+-import lombok.Data;
+-import lombok.NoArgsConstructor;
+-
+-import java.time.LocalDateTime;
+-import java.time.OffsetDateTime;
+-
+-@Data
+-@NoArgsConstructor
+-@AllArgsConstructor
+-public class ContactDTO {
+-    private int id;
+-    private String name;
+-    private String email;
+-    private String source;
+-    private LocalDateTime createdAt;
+-    private LocalDateTime updatedAt;
+-}
+\ No newline at end of file
+Index: src/main/java/org/config/WebConfig.java
+===================================================================
+diff --git a/src/main/java/org/config/WebConfig.java b/src/main/java/org/config/WebConfig.java
+deleted file mode 100644
+--- a/src/main/java/org/config/WebConfig.java	(revision 146c78c97f18c3ff4ba84851b79c19abc894c3dd)
++++ /dev/null	(revision 146c78c97f18c3ff4ba84851b79c19abc894c3dd)
+@@ -1,17 +0,0 @@
+-package org.config;
+-
+-
+-import org.springframework.context.annotation.Configuration;
+-import org.springframework.http.converter.HttpMessageConverter;
+-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+-
+-import java.util.List;
+-
+-@Configuration
+-public class WebConfig implements WebMvcConfigurer {
+-    @Override
+-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+-        converters.add(new MappingJackson2HttpMessageConverter());
+-    }
+-}
+Index: src/main/java/org/controller/GlobalExceptionHandler.java
+===================================================================
+diff --git a/src/main/java/org/controller/GlobalExceptionHandler.java b/src/main/java/org/controller/GlobalExceptionHandler.java
+deleted file mode 100644
+--- a/src/main/java/org/controller/GlobalExceptionHandler.java	(revision 146c78c97f18c3ff4ba84851b79c19abc894c3dd)
++++ /dev/null	(revision 146c78c97f18c3ff4ba84851b79c19abc894c3dd)
+@@ -1,17 +0,0 @@
+-package org.controller;
+-
+-import org.springframework.http.HttpStatus;
+-import org.springframework.web.bind.annotation.ControllerAdvice;
+-import org.springframework.web.bind.annotation.ExceptionHandler;
+-import org.springframework.web.bind.annotation.ResponseStatus;
+-import org.springframework.web.servlet.NoHandlerFoundException;
+-
+-@ControllerAdvice
+-public class GlobalExceptionHandler {
+-
+-    @ExceptionHandler(NoHandlerFoundException.class)
+-    @ResponseStatus(HttpStatus.NOT_FOUND)
+-    public String handleNotFound(Exception ex) {
+-        return "error/404";
+-    }
+-}
