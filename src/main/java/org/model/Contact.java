@@ -15,12 +15,10 @@ public class Contact {
     private int id;
     private String name;
     private String email;
-    private String source;
-
-    @JsonProperty("createdAt")
+    @JsonProperty("created_at")
     private LocalDateTime createdAt;
 
-    @JsonProperty("updatedAt")
+    @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
 
 }

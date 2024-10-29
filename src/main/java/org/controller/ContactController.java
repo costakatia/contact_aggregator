@@ -1,14 +1,15 @@
 package org.controller;
 
-
-import org.dto.ContactDTO;
+import org.model.Contact;
 import org.service.ContactService;
-import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 
 @RestController
-@RequestMapping("/contacts")
 public class ContactController {
 
     private final ContactService contactService;
@@ -17,9 +18,8 @@ public class ContactController {
         this.contactService = contactService;
     }
 
-    @GetMapping
-    public List<ContactDTO> getAllContacts() {
-        return  contactService.getAllContacts();
-
+    @GetMapping("/contacts")
+    public List<Contact> getAllContacts() throws IOException {
+        return contactService.getAllContacts();
     }
 }

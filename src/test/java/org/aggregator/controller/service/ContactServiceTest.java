@@ -1,82 +1,91 @@
 package org.aggregator.controller.service;
 
-import org.dto.ContactDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.model.Contact;
+import org.model.ContactResponse;
 import org.service.ContactService;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-public class ContactServiceTest {
+class ContactServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private ObjectMapper objectMapper;
+
     @InjectMocks
     private ContactService contactService;
 
-    private Contact[] contactsPage1;
-    private Contact[] contactsPage2;
-
     @BeforeEach
-    public void setUp() {
-        // Initialize mock data
-        contactsPage1 = new Contact[]{
-                new Contact(1, "John Doe", "john.doe@example.com", "2023-01-01T00:00:00Z", LocalDateTime.now(),LocalDateTime.now()),
-                new Contact(2, "Jane Smith", "jane.smith@example.com", "2023-01-01T00:00:00Z", LocalDateTime.now(),LocalDateTime.now())
-        };
-
-        contactsPage2 = new Contact[]{
-                new Contact(3, "Alice Johnson", "alice.johnson@example.com", "2023-01-01T00:00:00Z", LocalDateTime.now(),LocalDateTime.now())
-        };
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        contactService = new ContactService(restTemplate, objectMapper, "http://mock-api.com/contacts", "mock-token");
     }
 
     @Test
-    public void testGetAllContacts() {
-        // Mock the RestTemplate behavior
-        when(restTemplate.getForObject(anyString(), eq(Contact[].class)))
-                .thenReturn(contactsPage1)
-                .thenReturn(contactsPage2)
-                .thenReturn(new Contact[0]); // Simulate no more pages
+    void getAllContacts_shouldReturnListOfContacts() throws IOException {
+        // Mock the JSON response as a string
+        String jsonResponse = """
+            {
+                "contacts": [
+                    {"id": 1, "name": "jmadsen", "email": "jmadsen@kenect.com", "created_at": "2020-06-25T02:29:23.755Z", "updated_at": "2020-06-25T02:29:23.755Z"},
+                    {"id": 2, "name": "Jalisa Quigley", "email": "jalisa@example.com", "created_at": "2020-06-25T02:31:51.233Z", "updated_at": "2020-06-25T02:31:51.233Z"}
+                ]
+            }
+        """;
 
-        // Call the method under test
-        List<ContactDTO> result = contactService.getAllContacts();
+        // Mock the deserialization process
+        ContactResponse mockResponse = new ContactResponse();
+        mockResponse.setContacts(List.of(
+                new Contact(1, "jmadsen", "jmadsen@kenect.com", LocalDateTime.now(),  LocalDateTime.now()),
+                new Contact(2, "Jalisa Quigley", "jalisa@example.com",  LocalDateTime.now(),  LocalDateTime.now())
+        ));
 
-        // Verify the results
-        assertEquals(3, result.size());
-        assertEquals("John Doe", result.get(0).getName());
-        assertEquals("Jane Smith", result.get(1).getName());
-        assertEquals("Alice Johnson", result.get(2).getName());
+        // Configure o mock ObjectMapper para retornar o mockResponse
+        when(objectMapper.readValue(jsonResponse, ContactResponse.class)).thenReturn(mockResponse);
 
-        // Verify that the RestTemplate was called the expected number of times
-        verify(restTemplate, times(3)).getForObject(anyString(), eq(Contact[].class));
-    }
+        // Mock the response entity
+        ResponseEntity<String> responseEntity = mock(ResponseEntity.class);
+        when(responseEntity.getBody()).thenReturn(jsonResponse);
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Total-Pages", "1");
+        when(responseEntity.getHeaders()).thenReturn(headers);
 
-    @Test
-    public void testGetAllContactsEmpty() {
-        // Mock the RestTemplate behavior to return no contacts
-        when(restTemplate.getForObject(anyString(), eq(Contact[].class)))
-                .thenReturn(new Contact[0]);
+        // Mock RestTemplate exchange method
+        when(restTemplate.exchange(
+                any(String.class),
+                eq(HttpMethod.GET),
+                any(HttpEntity.class),
+                eq(String.class))
+        ).thenReturn(responseEntity);
 
-        // Call the method under test
-        List<ContactDTO> result = contactService.getAllContacts();
+        // Execute the service method
+        List<Contact> contacts = contactService.getAllContacts();
 
-        // Verify the results
-        assertEquals(0, result.size());
-
-        // Verify that the RestTemplate was called once
-        verify(restTemplate, times(1)).getForObject(anyString(), eq(Contact[].class));
+        // Validate the result
+        assertEquals(2, contacts.size());
+        assertEquals("jmadsen", contacts.get(0).getName());
+        assertEquals("Jalisa Quigley", contacts.get(1).getName());
     }
 }

@@ -1,57 +1,60 @@
 package org.aggregator.controller;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.controller.ContactController;
-import org.dto.ContactDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
+import org.model.Contact;
 import org.service.ContactService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ContactController.class)
-public class ContactControllerTest {
+class ContactControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @MockBean
     private ContactService contactService;
 
-    @InjectMocks
-    private ContactController contactController;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    private MockMvc mockMvc;
+    private List<Contact> mockContacts;
 
     @BeforeEach
-    public void setup() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(contactController).build();
+    void setUp() {
+        mockContacts = List.of(
+                new Contact(1, "jmadsen", "jmadsen@kenect.com", LocalDateTime.now(), LocalDateTime.now()),
+                new Contact(2, "Jalisa Quigley", "jalisa@example.com", LocalDateTime.now(), LocalDateTime.now())
+        );
     }
 
     @Test
-    public void testGetAllContacts() throws Exception {
-        // Arrange
-        ContactDTO contact1 = new ContactDTO();
-        contact1.setId(1);
-        contact1.setName("John Doe");
-        contact1.setEmail("john.doe@example.com");
+    void getAllContacts_ShouldReturnListOfContacts() throws Exception {
+        // Mockando o comportamento do ContactService para retornar mockContacts
+        when(contactService.getAllContacts()).thenReturn(mockContacts);
 
-        ContactDTO contact2 = new ContactDTO();
-        contact2.setId(2);
-        contact2.setName("Jane Doe");
-        contact2.setEmail("jane.doe@example.com");
-
-        List<ContactDTO> contacts = Arrays.asList(contact1, contact2);
-
-        when(contactService.getAllContacts()).thenReturn(contacts);
-
-
+        // Fazendo a chamada para o endpoint e verificando a resposta
+        mockMvc.perform(get("/contacts")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(mockContacts)));
     }
 }
