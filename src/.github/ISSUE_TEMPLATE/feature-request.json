@@ -1,5 +1,5 @@
 {
-  "name": "✨ Feature Request (Engenharia Camunda Monorepo)",
+  "name": "Feature Request (Engenharia Camunda Monorepo)",
   "description": "Sugerir uma nova funcionalidade ou melhoria técnica no monorepo",
   "title": "[Feature] <título descritivo da funcionalidade>",
   "labels": ["feature", "engineering", "monorepo"],
@@ -7,14 +7,14 @@
     {
       "type": "markdown",
       "attributes": {
-        "value": "### ✨ Solicitação de Funcionalidade / Melhoria Técnica\nPreencha os campos abaixo para propor uma nova funcionalidade ou melhoria nos processos de engenharia."
+        "value": "### Solicitação de Funcionalidade / Melhoria Técnica\nPreencha os campos abaixo para propor uma nova funcionalidade ou melhoria nos processos de engenharia."
       }
     },
     {
       "type": "input",
       "id": "contexto",
       "attributes": {
-        "label": "📌 Contexto",
+        "label": "Contexto",
         "description": "Descreva o que está sendo proposto e onde se aplica no monorepo (módulo, pasta, serviço etc.).",
         "placeholder": "Ex: Adicionar versionamento automático em core/release-tools"
       },
@@ -26,7 +26,7 @@
       "type": "textarea",
       "id": "objetivo",
       "attributes": {
-        "label": "🎯 Objetivo",
+        "label": "Objetivo",
         "description": "Explique o problema ou oportunidade que essa funcionalidade aborda.",
         "placeholder": "Ex: Reduzir esforço manual e riscos nos releases"
       },
@@ -38,7 +38,7 @@
       "type": "textarea",
       "id": "proposta",
       "attributes": {
-        "label": "🧠 Proposta Técnica",
+        "label": "Proposta Técnica",
         "description": "Descreva brevemente a solução técnica proposta, incluindo ferramentas ou abordagens.",
         "placeholder": "Ex: Adotar semantic-release + conventional commits no CI"
       },
@@ -50,7 +50,7 @@
       "type": "textarea",
       "id": "criterios",
       "attributes": {
-        "label": "✅ Critérios de Aceite",
+        "label": "Critérios de Aceite",
         "description": "Liste os critérios que determinam quando essa feature está completa.",
         "placeholder": "- [ ] Automação de versão\n- [ ] Atualização de tags\n- [ ] Documentação atualizada"
       },
@@ -62,7 +62,7 @@
       "type": "textarea",
       "id": "impacto",
       "attributes": {
-        "label": "📊 Impacto Esperado",
+        "label": "Impacto Esperado",
         "description": "Descreva os benefícios técnicos ou organizacionais.",
         "placeholder": "Ex: Mais segurança e consistência nos releases automáticos"
       },
@@ -74,7 +74,7 @@
       "type": "textarea",
       "id": "referencias",
       "attributes": {
-        "label": "🔗 Referências / Observações",
+        "label": "Referências / Observações",
         "description": "Links úteis, RFCs, discussões, PRs relacionados, etc.",
         "placeholder": "Ex: RFC-42, semantic-release docs"
       },
